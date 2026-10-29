@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Music Tycoon</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#5fd0ff;--bg2:#b9a8ff;--panel:#fff;--ink:#20224a;--mute:#6b6e9c;--line:#dcdcf5;--pop:#ff4f8b;--popd:#c2285f;--ok:#2cc58a;--okd:#17956a;--bad:#ff6b5e;--hi:#6c4cff;--hid:#4a2fd1;--gold:#ffc83d;--wall:#ffe6f0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#1b1650;--bg2:#3a1b5e;--panel:#2b2468;--ink:#f4f0ff;--mute:#b3aee0;--line:#463d8f;--wall:#4a2d7a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg1:#1b1650;--bg2:#3a1b5e;--panel:#2b2468;--ink:#f4f0ff;--mute:#b3aee0;--line:#463d8f;--wall:#4a2d7a;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:linear-gradient(160deg,var(--bg1),var(--bg2)) fixed;color:var(--ink);font-family:Fredoka,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.4}
+[hidden]{display:none!important}
+.wrap{max-width:1080px;margin:0 auto;padding:10px}
+.card{background:var(--panel);border-radius:22px;border-bottom:6px solid var(--line);padding:14px 16px;margin-bottom:12px}
+.card h2{margin:0 0 6px;font-size:19px}.sub{color:var(--mute);font-size:14px;margin:0 0 8px}
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
+.hud .date{font-size:21px;font-weight:700;margin-right:auto}.hud b{font-size:20px;display:block;line-height:1}.hud small{color:var(--mute);font-size:12.5px}
+.en{display:flex;gap:3px}.en i{width:12px;height:22px;border-radius:4px;background:var(--line)}.en i.on{background:var(--gold)}
+.btn{font:inherit;font-weight:600;border:0;border-bottom:5px solid var(--hid);border-radius:16px;background:var(--hi);color:#fff;padding:10px 14px;min-height:48px;cursor:pointer}
+.btn:active:not(:disabled){transform:translateY(3px);border-bottom-width:2px}
+.btn.pop{background:var(--pop);border-color:var(--popd)}.btn.ok{background:var(--ok);border-color:var(--okd)}.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line);border-bottom-width:4px}
+.btn:disabled{opacity:.45;cursor:not-allowed}.btn small{display:block;font-weight:400;font-size:12px;opacity:.9}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+main{display:grid;grid-template-columns:1.5fr 1fr;gap:12px;align-items:start}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:10px}
+.grp{font-weight:600;font-size:14px;color:var(--mute);margin:8px 0 6px}
+.mem{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-top:2px solid var(--line);font-size:14.5px}.mem small{color:var(--mute)}
+.log{max-height:200px;overflow:auto;font-size:14px;color:var(--mute)}.log p{margin:0 0 6px}.log p:first-child{color:var(--ink);font-weight:500}
+dialog{border:0;border-radius:26px;padding:0;max-width:600px;width:calc(100% - 24px);background:var(--panel);color:var(--ink);box-shadow:0 24px 70px rgba(10,5,50,.5);border-bottom:8px solid var(--line);max-height:90vh}
+dialog::backdrop{background:rgba(25,15,80,.55)}
+.dl{padding:20px 22px 22px}.dl h2{font-size:24px;margin:0 0 4px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:8px 0}
+.opt{font:inherit;text-align:left;border:3px solid var(--line);background:transparent;color:var(--ink);border-radius:16px;padding:8px 12px;cursor:pointer}
+.opt[aria-pressed=true]{border-color:var(--pop);background:rgba(255,79,139,.12)}.opt small{display:block;color:var(--mute)}
+input[type=text],select{font:inherit;width:100%;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:transparent;color:var(--ink);min-height:44px}
+input[type=range]{width:100%;height:36px;accent-color:var(--pop)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-top:2px solid var(--line);font-size:14.5px}.row small{color:var(--mute);display:block}
+.row .bt{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.row .btn{min-height:40px;padding:6px 12px;font-size:14px}
+.title{text-align:center;padding-top:6vh}.title h1{font-size:clamp(44px,10vw,88px);line-height:.95;margin:0 0 8px;color:#fff;text-shadow:0 5px 0 rgba(0,0,0,.18)}
+.title p{color:#fff;margin:0 0 24px;font-size:18px}.slots{max-width:520px;margin:18px auto 0;text-align:left}
+.tabs{display:flex;gap:8px;margin:8px 0}
+.me{background:var(--pop);color:#fff;border-radius:10px;padding:3px 8px;margin:2px 0}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:10px 18px;border-radius:99px;max-width:calc(100% - 24px);z-index:20}
+svg{display:block;width:100%;height:auto;border-radius:16px}
+@media (max-width:860px){main{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="title" hidden></div>
+<div class="wrap" id="game" hidden>
+ <div class="card hud" id="hud"></div>
+ <main>
+  <div><div class="card" id="scene"></div><div class="card" id="acts"></div></div>
+  <div><div class="card" id="band"></div><div class="card"><h2>Log</h2><div class="log" id="log"></div></div></div>
+ </main>
+</div>
+<dialog id="dlg"></dialog>
+<div class="toast" id="toast" hidden></div>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)},R=Math.random,cl=function(x,a,b){return Math.max(a,Math.min(b,x))},avg=function(a){return a.reduce(function(x,y){return x+y},0)/a.length};
+var INST=[["vox","Vocals","🎤","#ff4f8b"],["gtr","Guitar","🎸","#ff9f43"],["key","Keys","🎹","#6c4cff"],["bas","Bass","🎻","#2cc58a"],["drm","Drums","🥁","#29b6f6"]];
+var SPEC={tech:["Technical","+ talent, faster practice",[55,35,40,40]],crea:["Creative","+ creativity",[40,58,38,40]],show:["Showman","+ busking pay",[45,40,55,35]],nerd:["Studio nerd","+ knowledge",[38,40,45,58]]};
+var KITS=[["vox","Karaoke mic",.62],["vox","Cheap dynamic mic",.68],["gtr","Hand-me-down acoustic",.6],["gtr","Pawn-shop electric",.68],["key","Toy keyboard",.58],["key","Secondhand Casio",.66],["bas","Cracked bass",.6],["bas","Loaner bass and tiny amp",.68],["drm","Practice pad and buckets",.56],["drm","Thrift-store kit",.66]];
+var TN={vox:["Stage mic","Vocal booth kit","Studio condenser"],gtr:["Used electric","Tube amp rig","Boutique rig"],key:["Analog synth","Stage piano","Workstation"],bas:["Used bass","Bass amp stack","Studio bass rig"],drm:["Full acoustic kit","Roadworthy kit","Studio kit"]};
+var TQ=[.85,1.05,1.3],TP=[250,1200,5000],TL=[0,2,4];
+var LOCS=[["Home","Your folks' place. Free.",0],["Garage","A drafty garage with a door that shuts.",150],["Practice room","Rented room with some sound treatment.",400],["Project studio","Mixing desk and a real vocal booth.",1100],["Pro studio","The good stuff.",3000]];
+var SRC={sub:["The subway",2,0,25,55],camp:["Music school campus",3,0,40,70],ads:["Classified ads",1,20,20,60],board:["Message board",1,0,30,65]};
+var NAMES=["Dex","Ria","Kit","Moe","Jax","Lena","Tomas","Piper","Nico","Sasha","Bo","Wren","Ollie","Mara","Finn","Zoe"],ADJ=["Neon","Velvet","Midnight","Golden","Electric","Paper","Lucky","Crystal"],NN=["Hearts","Static","Skyline","Summer","Echoes","Kisses","Radio","Fireworks"];
+var AIB=["The Paper Kites Club","Velvet Static","Glass Harbor","Nova Parade","Mild Thunder","Pink Cassette","Echo Avenue","Sunday Riot","Lunar Diner","Hello Hologram","Cherry Static","The Lazy Comets"];
+var TH={Love:[.8,.9,.9,.8,.8],Party:[1,.7,.8,.9,.9],Heartbreak:[.7,.9,.8,.9,.9],Rebellion:[.9,.8,.6,.5,.6],Dreams:[.8,.7,.7,.8,.9],Nostalgia:[.4,.5,.6,.7,.8]};
+var EV={1982:"Cassettes make music portable.",1986:"Synth-pop takes over the radio.",1990:"CDs arrive. Hits pay more.",1999:"File sharing spreads.",2003:"Downloads begin, piracy bites.",2011:"Streaming takes over.",2020:"Genres blend. Playlists drive hits."};
+var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],S=null,slot=0,cr={k:"gtr",sp:"tech",sl:1},tab=0;
+function yr(){return 1980+Math.floor(S.d/144)}function infl(){return 1+.03*(yr()-1980)}
+function fmt(n){return Math.round(n).toLocaleString()}
+function lerp(k,y){for(var i=0;i<k.length-1;i++)if(y<=k[i+1][0]){var t=(y-k[i][0])/(k[i+1][0]-k[i][0]);return k[k.length-1>i?i:0][1]+t*(k[i+1][1]-k[i][1])}return k[k.length-1][1]}
+function tSyn(y){return lerp([[1980,.3],[1986,.85],[1994,.4],[2002,.5],[2012,.8],[2030,.9]],y)}function tPol(y){return .3+(cl(y,1980,2030)-1980)/50*.65}
+function reach(y){return lerp([[1980,6000],[1990,12000],[2000,25000],[2010,18000],[2020,22000],[2030,24000]],y)}
+function dstr(d){return"D"+(d%3+1)+" W"+(Math.floor(d/3)%4+1)+" "+MON[Math.floor(d/12)%12]+" "+(1980+Math.floor(d/144))}
+function skill(m){return(m.tal+m.cre+m.res+m.kno)/400}
+function gq(k){var g=S.gear[k]?S.gear[k].q:0,r=S.rent[k]&&S.rent[k].until>S.d?S.rent[k].q:0;return Math.max(g,r)}
+function toast(t){var e=$("toast");e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(function(){e.hidden=true},2800)}
+function add(t){S.log.unshift("<p>"+dstr(S.d)+": "+t+"</p>");S.log=S.log.slice(0,50)}
+function key(i){return"mt3-slot"+i}
+function save(){if(!S)return;S.meta={n:S.band[0].n,d:dstr(S.d),c:S.cash};try{localStorage.setItem(key(slot),JSON.stringify(S))}catch(e){}}
+function peek(i){try{var r=localStorage.getItem(key(i));return r?JSON.parse(r):null}catch(e){return null}}
+function D(h){var d=$("dlg");d.innerHTML='<div class="dl">'+h+'</div>';if(!d.open)d.showModal()}
+function X(){$("dlg").close()}
+
+function titleScr(){S=null;$("game").hidden=true;$("title").hidden=false;
+ var h='<div class="title"><h1>Music Tycoon</h1><p>Start in a bedroom. Build a band. Top the pop charts.</p><button class="btn pop" data-a="new" style="font-size:20px;padding:12px 34px">New game</button></div><div class="card slots"><h2>Save slots</h2>';
+ for(var i=1;i<=3;i++){var p=peek(i);h+='<div class="row"><div>Slot '+i+'<small>'+(p?p.meta.n+", "+p.meta.d+", $"+fmt(p.meta.c):"Empty")+'</small></div><div class="bt">'+(p?'<button class="btn" data-a="load" data-i="'+i+'">Load</button><button class="btn ghost" data-a="del" data-i="'+i+'">Delete</button>':"")+'</div></div>'}
+ $("title").innerHTML=h+'</div>'}
+function create(){var h='<h2>Create your musician</h2><p class="sub">You are one member of the band. Recruit the rest.</p><input type="text" id="nm" maxlength="14" placeholder="Your stage name" aria-label="Stage name" value="'+(cr.n||"")+'"><div class="sub" style="margin-top:10px">Instrument</div><div class="opts">';
+ INST.forEach(function(s){h+='<button class="opt" data-k="'+s[0]+'" aria-pressed="'+(cr.k==s[0])+'">'+s[2]+" "+s[1]+'</button>'});
+ h+='</div><div class="sub">Specialization</div><div class="opts">';
+ for(var k in SPEC)h+='<button class="opt" data-sp="'+k+'" aria-pressed="'+(cr.sp==k)+'">'+SPEC[k][0]+'<small>'+SPEC[k][1]+'</small></button>';
+ h+='</div><div class="sub">Save slot</div><div class="opts">';
+ for(var i=1;i<=3;i++){var p=peek(i);h+='<button class="opt" data-sl="'+i+'" aria-pressed="'+(cr.sl==i)+'">Slot '+i+'<small>'+(p?"Overwrites "+p.meta.n:"Empty")+'</small></button>'}
+ D(h+'</div><div class="row" style="border:0"><button class="btn ghost" data-a="x">Cancel</button><button class="btn pop" data-a="start">Start</button></div>')}
+function startGame(){
+ var nm=($("nm").value||"Player").trim()||"Player",st=SPEC[cr.sp][2],kits=KITS.filter(function(x){return x[0]==cr.k}),kit=kits[R()*kits.length|0];
+ slot=cr.sl;S={d:0,en:10,cash:150,fans:5,buzz:0,loc:0,coh:.75,hits:0,log:[],gear:{},rent:{},charts:[],
+  band:[{n:nm,k:cr.k,tal:st[0],cre:st[1],res:st[2],kno:st[3],sp:cr.sp,p:1}],sty:.5,pol:.4,theme:"Love"};
+ S.gear[cr.k]={name:kit[1],q:kit[2]};add(nm+" starts at home with a "+kit[1].toLowerCase()+".");X();show()}
+function show(){$("title").hidden=true;$("game").hidden=false;render()}
+
+function render(){if(!S)return;
+ var e="";for(var i=0;i<10;i++)e+='<i class="'+(i<S.en?"on":"")+'"></i>';
+ $("hud").innerHTML='<div class="date">'+dstr(S.d)+'</div><div><b style="color:'+(S.cash<0?"var(--bad)":"inherit")+'">$'+fmt(S.cash)+'</b><small>cash</small></div><div><b>'+fmt(S.fans)+'</b><small>fans</small></div><div><b>'+Math.round(S.buzz)+'</b><small>buzz</small></div><div><div class="en" aria-label="Energy '+S.en+' of 10">'+e+'</div><small>energy</small></div><button class="btn pop" data-a="end">End turn</button>';
+ var h='<svg viewBox="0 0 640 200" role="img" aria-label="Your band"><rect width="640" height="200" fill="var(--wall)"/><rect y="150" width="640" height="50" fill="rgba(108,76,255,.25)"/>';
+ INST.forEach(function(s,i){var m=S.band.filter(function(x){return x.k==s[0]})[0],x=70+i*125;
+  if(m)h+='<rect x="'+(x-16)+'" y="92" width="32" height="50" rx="14" fill="'+s[3]+'"/><circle cx="'+x+'" cy="78" r="17" fill="#ffd9b8"/><path d="M'+(x-17)+' 76a17 17 0 0 1 34 0z" fill="#3a2a2a"/><text x="'+(x-12)+'" y="148" font-size="26">'+s[2]+'</text><text x="'+x+'" y="186" font-size="13" text-anchor="middle" fill="var(--ink)">'+m.n+'</text>';
+  else h+='<circle cx="'+x+'" cy="95" r="26" fill="none" stroke="var(--mute)" stroke-width="3" stroke-dasharray="6 6"/><text x="'+(x-8)+'" y="105" font-size="26" fill="var(--mute)">?</text><text x="'+x+'" y="186" font-size="13" text-anchor="middle" fill="var(--mute)">'+s[1]+' open</text>'});
+ $("scene").innerHTML='<h2>'+LOCS[S.loc][0]+'</h2>'+h+'</svg>';
+ function b(a,l,c,m,cls){var off=S.en<c||S.cash<m;return'<button class="btn '+(cls||"")+'" data-a="'+a+'"'+(off?" disabled":"")+'>'+l+'<small>'+c+" energy"+(m?", $"+fmt(m):"")+'</small></button>'}
+ var y=yr(),i2=infl();
+ $("acts").innerHTML='<h2>Actions</h2><div class="grp">Perform and practice</div><div class="grid">'+b("busk","Busk",3,0,"ok")+b("prac","Practice",2,0)+b("song","Write a song",5,Math.round(80*(1+S.loc)*i2),"pop")+'</div><div class="grp">Recruit</div><div class="grid">'+Object.keys(SRC).map(function(k){var s=SRC[k];return b("rec:"+k,s[0],s[1],s[2])}).join("")+'</div><div class="grp">Promote</div><div class="grid">'+b("flier","Post fliers",1,Math.round(5*i2))+b("stick","Stickers and posters",2,Math.round(30*i2))+(y>=2000?b("plays","Buy plays online",1,Math.round(60*i2)):'<button class="btn" disabled>Buy plays online<small>from 2000</small></button>')+'</div><div class="grid"><button class="btn ghost" data-a="shop">Gear and places</button><button class="btn ghost" data-a="charts">Pop Charts</button><button class="btn ghost" data-a="menu">Menu</button></div>';
+ var m='<h2>The band</h2><p class="sub">Cohesion '+Math.round(S.coh*100)+'%. Wages $'+fmt(wages())+' a month.</p>';
+ S.band.forEach(function(x){var s=INST.filter(function(q){return q[0]==x.k})[0];m+='<div class="mem"><div><b>'+x.n+'</b> '+s[2]+'<small> '+(S.gear[x.k]?S.gear[x.k].name:"no gear")+'</small></div><small>tal '+Math.round(x.tal)+' cre '+Math.round(x.cre)+' res '+Math.round(x.res)+' kno '+Math.round(x.kno)+'</small></div>'});
+ $("band").innerHTML=m;$("log").innerHTML=S.log.join("");save()}
+function wages(){return Math.round(S.band.reduce(function(a,m){return a+(m.p?0:m.w)},0))}
+function spend(c,m){S.en-=c;S.cash-=m}
+function endTurn(){S.d++;S.en=10;S.buzz*=.96;
+ if(S.d%3==0){S.coh=cl(S.coh+(.75-S.coh)*.1,.2,1);var y=yr(),mean=38+(y-1980)*.35;for(var i=0;i<3;i++)S.charts.push({d:S.d,b:AIB[R()*12|0],t:ADJ[R()*8|0]+" "+NN[R()*8|0],q:mean+(R()+R()+R()-1.5)*18});
+  if(R()<.1){S.coh=cl(S.coh-.18,.2,1);add("Creative differences flare up.")}S.charts=S.charts.slice(-400)}
+ if(S.d%12==0){var bill=Math.round(LOCS[S.loc][2]*infl())+wages();S.cash-=bill;add("Monthly bills: $"+fmt(bill)+".")}
+ if(S.d%144==0&&EV[yr()]){add(EV[yr()]);toast(EV[yr()])}
+ if(S.cash<-1500){D('<h2>Out of money</h2><p class="sub">The band broke up. Load a save or start again.</p><button class="btn pop" data-a="menu2">Back to title</button>');return}
+ render()}
+function me(){return S.band[0]}
+function act(a){var c,y=yr(),i2=infl(),p=me();
+ if(a=="busk"&&S.en>=3){spend(3,0);var g=Math.round((8+p.tal*.25)*(1+S.fans/400)*i2*(p.sp=="show"?1.25:1)*(.7+R()*.6));S.cash+=g;S.fans+=1+(R()*3|0);S.buzz=Math.min(100,S.buzz+4);p.tal=Math.min(100,p.tal+.4);p.res=Math.min(100,p.res+.3);add("Busking earned $"+fmt(g)+", a few fans and some skill.");toast("Busked for $"+fmt(g))}
+ else if(a=="prac"&&S.en>=2){spend(2,0);var q=gq(p.k),gn=(.6+q*.8)*(.7+R()*.6);p.tal=Math.min(100,p.tal+gn*(p.sp=="tech"?1.25:1));p.kno=Math.min(100,p.kno+gn*.5*(p.sp=="nerd"?1.5:1));p.cre=Math.min(100,p.cre+gn*.3*(p.sp=="crea"?1.5:1));add("Practice with your "+(S.gear[p.k]?S.gear[p.k].name:"gear")+" (+"+gn.toFixed(1)+" talent).");toast("Practiced: +"+gn.toFixed(1)+" talent")}
+ else if(a=="flier"&&S.en>=1&&S.cash>=5*i2){spend(1,Math.round(5*i2));S.buzz=Math.min(100,S.buzz+3);S.fans+=1;toast("Fliers posted")}
+ else if(a=="stick"&&S.en>=2&&S.cash>=30*i2){spend(2,Math.round(30*i2));S.buzz=Math.min(100,S.buzz+8);toast("Stickers and posters up")}
+ else if(a=="plays"&&S.en>=1&&S.cash>=60*i2){spend(1,Math.round(60*i2));S.buzz=Math.min(100,S.buzz+10);S.fans+=3;toast("Plays purchased")}
+ else if(a.indexOf("rec:")==0){var s=SRC[a.slice(4)];if(S.en<s[1]||S.cash<s[2])return;var open=INST.filter(function(q){return!S.band.some(function(m){return m.k==q[0]})});if(!open.length){toast("Your band is full");return}spend(s[1],s[2]);
+  var k=open[R()*open.length|0][0],r=function(){return Math.round(s[3]+R()*(s[4]-s[3]))},m={n:NAMES[R()*16|0],k:k,tal:r(),cre:r(),res:r(),kno:r()};m.w=Math.round((50+skill(m)*180)*infl());cand=m;
+  var ic=INST.filter(function(q){return q[0]==k})[0];D('<h2>'+m.n+' wants to talk</h2><p class="sub">Found at: '+s[0]+'. Plays '+ic[2]+' '+ic[1]+'.</p><div class="mem"><span>Talent '+m.tal+', creativity '+m.cre+'</span><span>Resourcefulness '+m.res+', knowledge '+m.kno+'</span></div><p>Wants $'+fmt(m.w)+' a month.</p><div class="row" style="border:0"><button class="btn ghost" data-a="x">Pass</button><button class="btn ok" data-a="hire">Hire</button></div>')}
+ else if(a=="song"){var cs=Math.round(80*(1+S.loc)*i2);if(S.en<5||S.cash<cs)return;songDlg()}
+ else if(a=="shop")shop();else if(a=="charts")charts();
+ else if(a=="menu"){save();titleScr()}
+ render()}
+var cand=null;
+function songDlg(){var y=yr(),h='<h2>Write and record</h2><p class="sub">The audience leans '+(tSyn(y)>.6?"toward synths":tSyn(y)<.4?"toward guitars":"toward a mix")+' with a '+(tPol(y)>.65?"slick":tPol(y)<.45?"raw":"clean")+' finish. Open instrument slots hurt quality.</p><select id="th" aria-label="Theme">'+Object.keys(TH).map(function(t){var v=TH[t][Math.min(4,Math.floor((y-1980)/10))];return'<option'+(t==S.theme?" selected":"")+' value="'+t+'">'+t+" "+"★".repeat(Math.round(v*5))+'</option>'}).join("")+'</select><div class="sub" style="margin-top:10px">Guitar to synth</div><input type="range" id="sty" min="0" max="100" value="'+S.sty*100+'"><div class="sub">Raw to polished</div><input type="range" id="pol" min="0" max="100" value="'+S.pol*100+'"><div class="row" style="border:0"><button class="btn ghost" data-a="x">Cancel</button><button class="btn pop" data-a="rec">Record (5 energy)</button></div>';D(h)}
+function record(){
+ var y=yr(),cs=Math.round(80*(1+S.loc)*infl());S.theme=$("th").value;S.sty=$("sty").value/100;S.pol=$("pol").value/100;spend(5,cs);
+ var outs=S.band.map(function(m){return skill(m)*gq(m.k)*(1+.05*S.loc)}),raw=avg(outs)*(.55+.45*S.band.length/5)*1.7;
+ var sf=cl(1-Math.sqrt((Math.pow(S.sty-tSyn(y),2)+Math.pow(S.pol-tPol(y),2))/2)*1.5,.3,1),tf=TH[S.theme][Math.min(4,Math.floor((y-1980)/10))]*(.8+.2*avg(S.band.map(function(m){return m.kno}))/100);
+ var coh=.85+.3*Math.min(S.coh,.9),q=cl(raw*coh*(.5+.5*sf*tf)*100+(R()-.5)*8,1,100),title=ADJ[R()*8|0]+" "+NN[R()*8|0];
+ var ai=S.charts.filter(function(c){return!c.you&&S.d-c.d<12}),pos=1+ai.filter(function(c){return c.q>q}).length;
+ var rev=Math.round(reach(y)*(1/(1+(pos-1)*.4))*(.4+.6*Math.min(1,S.fans/3000)+S.buzz*.004)*(.85+R()*.3)),fg=Math.round(Math.max(-5,(11-pos)*5));
+ S.cash+=rev;S.fans=Math.max(1,S.fans+fg);if(pos<=5)S.hits++;S.buzz=Math.min(100,S.buzz+(pos<=5?10:0));
+ S.charts.push({d:S.d,b:me().n+" and band",t:title,q:q,you:1});add(title+" charted at #"+pos+" and earned $"+fmt(rev)+".");
+ D('<h2>'+title+'</h2><p class="sub">Chart position</p><div style="font-size:56px;font-weight:700;color:var(--pop);line-height:1">#'+pos+'</div><p>Quality '+Math.round(q)+'. Earned $'+fmt(rev)+', '+(fg>=0?"gained ":"lost ")+Math.abs(fg)+' fans.</p><div class="mem"><span>Player output</span><span>'+Math.round(raw*100)+'%</span></div><div class="mem"><span>Sound match</span><span>'+Math.round(sf*100)+'%</span></div><div class="mem"><span>Theme match</span><span>'+Math.round(tf*100)+'%</span></div><div class="mem"><span>Band slots filled</span><span>'+S.band.length+' of 5</span></div><div class="row" style="border:0"><button class="btn" data-a="pc">View Pop Charts</button><button class="btn pop" data-a="x">Continue</button></div>')}
+function charts(){
+ var l=S.charts.filter(function(c){return tab==1||S.d-c.d<12}).sort(function(a,b){return b.q-a.q}).slice(0,15);
+ var h='<h2>Pop Charts</h2><div class="tabs"><button class="btn '+(tab?"ghost":"")+'" data-tab="0">Last 4 weeks</button><button class="btn '+(tab?"":"ghost")+'" data-tab="1">All time</button></div>';
+ if(!l.length)h+='<p class="sub">No releases yet. New AI releases arrive each week.</p>';
+ l.forEach(function(c,i){h+='<div class="'+(c.you?"me":"")+' row" style="border:0;padding:3px 8px"><span>'+(i+1)+". "+c.t+'<small'+(c.you?' style="color:#fff"':"")+'>'+c.b+" , "+dstr(c.d)+'</small></span><b>'+Math.round(c.q)+'</b></div>'});
+ D(h+'<div class="row" style="border:0"><span></span><button class="btn pop" data-a="x">Close</button></div>')}
+function shop(){var y=yr(),h='<h2>Gear and places</h2><p class="sub">Buy gear to keep it, or rent it for a month (a quarter of the price).</p>';
+ INST.forEach(function(s){for(var t=0;t<3;t++){if(S.loc<TL[t])continue;var n=TN[s[0]][t],pr=Math.round(TP[t]*infl()),rt=Math.round(pr*.25),owned=S.gear[s[0]]&&S.gear[s[0]].q>=TQ[t];
+  h+='<div class="row"><div>'+s[2]+" "+n+'<small>Quality x'+TQ[t]+(S.rent[s[0]]&&S.rent[s[0]].name==n&&S.rent[s[0]].until>S.d?", rented":"")+'</small></div><div class="bt">'+(owned?'<small>Owned or better</small>':'<button class="btn" data-buy="'+s[0]+":"+t+'"'+(S.cash<pr?" disabled":"")+'>Buy $'+fmt(pr)+'</button><button class="btn ghost" data-rent="'+s[0]+":"+t+'"'+(S.cash<rt?" disabled":"")+'>Rent $'+fmt(rt)+'</button>')+'</div></div>'}});
+ h+='<div class="grp">Places</div>';
+ LOCS.forEach(function(l,i){var c=Math.round(l[2]*infl());h+='<div class="row"><div>'+l[0]+(i==S.loc?" (here)":"")+'<small>'+l[1]+(l[2]?" $"+fmt(c)+" a month":"")+'</small></div><div class="bt">'+(i==S.loc?"":'<button class="btn" data-loc="'+i+'"'+(S.cash<c?" disabled":"")+'>Move for $'+fmt(c)+'</button>')+'</div></div>'});
+ D(h+'<div class="row" style="border:0"><span></span><button class="btn pop" data-a="x">Close</button></div>')}
+
+document.addEventListener("click",function(e){var t=e.target.closest("button");if(!t)return;var a=t.dataset.a;
+ if(t.dataset.k){cr.n=$("nm").value;cr.k=t.dataset.k;create()}
+ else if(t.dataset.sp){cr.n=$("nm").value;cr.sp=t.dataset.sp;create()}
+ else if(t.dataset.sl){cr.n=$("nm").value;cr.sl=+t.dataset.sl;create()}
+ else if(t.dataset.tab!=null){tab=+t.dataset.tab;charts()}
+ else if(t.dataset.buy||t.dataset.rent){var v=(t.dataset.buy||t.dataset.rent).split(":"),k=v[0],ti=+v[1],pr=Math.round(TP[ti]*infl()),it={name:TN[k][ti],q:TQ[ti]};
+  if(t.dataset.buy&&S.cash>=pr){S.cash-=pr;S.gear[k]=it;add("Bought: "+it.name+".")}else if(t.dataset.rent&&S.cash>=Math.round(pr*.25)){S.cash-=Math.round(pr*.25);it.until=S.d+12;S.rent[k]=it;add("Rented: "+it.name+" for a month.")}shop();render()}
+ else if(t.dataset.loc){var li=+t.dataset.loc,c=Math.round(LOCS[li][2]*infl());if(S.cash>=c){S.cash-=c;S.loc=li;add("Moved to: "+LOCS[li][0]+".");shop();render()}}
+ else if(a=="new"){cr.n="";create()}
+ else if(a=="start")startGame();
+ else if(a=="load"){slot=+t.dataset.i;S=peek(slot);if(S)show()}
+ else if(a=="del"){if(confirm("Delete this save?")){try{localStorage.removeItem(key(+t.dataset.i))}catch(x){}titleScr()}}
+ else if(a=="x")X();else if(a=="pc"){tab=0;charts()}
+ else if(a=="end")endTurn();
+ else if(a=="hire"){if(cand){S.band.push(cand);if(!S.gear[cand.k])S.gear[cand.k]={name:"Their own gear",q:+(.5+R()*.15).toFixed(2)};add(cand.n+" joins the band.");toast(cand.n+" joined");cand=null}X();render()}
+ else if(a=="rec"){record();render()}
+ else if(a=="menu2"){X();titleScr()}
+ else if(a)act(a)});
+titleScr();
+})();
+</script>
+</body>
+</html>
